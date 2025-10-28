@@ -31,6 +31,8 @@
       /* Components */
       --ring-bg: conic-gradient(var(--accent) 0%, transparent 0%);
       --container-max: 1200px;
+      --surface-glow: radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 60%),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--accent) 25%, transparent) 0%, transparent 55%);
     }
 
     /* Light / Dark baselines (toggle via body[data-theme]) */
@@ -69,10 +71,31 @@
       color:var(--text);
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
-      padding: 16px;
+      padding: 20px clamp(16px, 4vw, 32px) 32px;
       display:flex;
       flex-direction:column;
       gap: 16px;
+      position:relative;
+      min-height:100vh;
+    }
+
+    body::before {
+      content:"";
+      position:fixed;
+      inset:0;
+      background:var(--surface-glow);
+      opacity:0.65;
+      pointer-events:none;
+      z-index:-1;
+    }
+
+    body::after {
+      content:"";
+      position:fixed;
+      inset:0;
+      background:linear-gradient(120deg, transparent 0%, color-mix(in srgb, var(--bg) 85%, transparent) 45%, transparent 100%);
+      pointer-events:none;
+      z-index:-2;
     }
 
     a { color:var(--accent); text-decoration:none; }
@@ -118,17 +141,32 @@
     }
     .brand-title { font-size:1rem; line-height:1; }
     .brand-sub { color:var(--muted); font-size:.88rem; }
+    .top-meta { display:flex; gap:12px; align-items:center; color:var(--muted); font-size:.9rem; }
 
     /* Grid */
     .grid {
       display:grid;
       grid-template-columns: 1fr;
-      gap:16px;
-      margin-top:8px;
+      gap:18px;
+      margin-top:16px;
     }
     @media (min-width:960px) {
-      .grid { grid-template-columns: 1.1fr 0.9fr; grid-auto-rows: 1fr; }
+      .grid {
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-rows: minmax(120px, auto);
+      }
+      #hero { grid-column: 1 / -1; }
+      #clocks { grid-column: 1 / span 7; }
+      #theme { grid-column: 8 / -1; }
+      #pomodoro { grid-column: 1 / span 7; }
+      #insights { grid-column: 8 / -1; }
       #motivation { grid-column: 1 / -1; }
+    }
+    @media (min-width:1200px) {
+      #clocks { grid-column: 1 / span 8; }
+      #theme { grid-column: 9 / -1; }
+      #pomodoro { grid-column: 1 / span 7; }
+      #insights { grid-column: 8 / -1; }
     }
 
     /* Card */
@@ -142,8 +180,12 @@
     .card h2 { margin:0 0 8px 0; font-size:1.1rem; }
     .subtle { color:var(--muted); font-size:.92rem; }
 
+    .card-header { display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background:color-mix(in srgb, var(--accent) 16%, transparent); border:1px solid color-mix(in srgb, var(--accent) 25%, var(--border)); font-size:.82rem; color:var(--text); }
+
     /* Controls & buttons */
     .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .controls.column { flex-direction:column; align-items:flex-start; }
     .btn {
       border: none;
       background: var(--btn-bg);
@@ -162,6 +204,27 @@
     .btn.small { padding:6px 10px; font-size:.9rem; }
     .btn.block { width:100%; display:block; }
     .btn.warn { --warn:#ff6b6b; background:var(--warn); color:#fff; box-shadow:0 6px 16px color-mix(in hsl,var(--warn)40%,transparent); }
+
+    label { display:flex; flex-direction:column; gap:4px; font-size:.92rem; color:var(--muted); }
+    input, select, textarea {
+      background:color-mix(in srgb, var(--card) 85%, transparent);
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:10px;
+      font:inherit;
+      transition:border-color .2s ease, box-shadow .2s ease;
+    }
+    textarea { min-height:96px; resize:vertical; }
+    input[type="color"] { padding:0; height:38px; }
+    input:focus, select:focus, textarea:focus { border-color:color-mix(in srgb, var(--accent) 60%, var(--border)); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); outline:none; }
+    input[type="range"] { accent-color:var(--accent); padding:0; }
+    select { cursor:pointer; }
+
+    details { background:color-mix(in srgb, var(--card) 92%, transparent); border-radius:12px; padding:10px 12px; border:1px solid color-mix(in srgb, var(--border) 80%, transparent); }
+    details summary { cursor:pointer; font-weight:600; color:var(--text); }
+    details summary::-webkit-details-marker { display:none; }
+    details[open] { border-color:color-mix(in srgb, var(--accent) 35%, var(--border)); }
 
     .segmented { display:inline-flex; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
     .segmented button { background:transparent; color:var(--text); border:none; padding:8px 12px; cursor:pointer; font-weight:600; font-size:.95rem; }
@@ -185,9 +248,33 @@
 
     .row { display:flex; gap:8px; align-items:center; }
 
+    /* Hero & extras */
+    .hero { position:relative; overflow:hidden; background:linear-gradient(160deg, color-mix(in srgb, var(--accent) 16%, var(--card)) 0%, var(--card) 50%, color-mix(in srgb, var(--bg) 80%, transparent) 100%); }
+    .hero::after { content:""; position:absolute; inset:0; background:radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--accent) 25%, transparent), transparent 55%), radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%); opacity:.6; pointer-events:none; }
+    .hero-content { position:relative; z-index:1; display:grid; gap:16px; }
+    .hero h1 { margin:0; font-size:clamp(1.8rem, 2.6vw + 1rem, 2.8rem); }
+    .hero p { margin:0; color:color-mix(in srgb, var(--text) 85%, var(--muted)); max-width:600px; }
+    .hero-actions { display:flex; flex-wrap:wrap; gap:10px; }
+
     /* Motivation */
     .motivation-wrap { display:flex; gap:18px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; }
-    .motivation { font-size:1.05rem; margin:0; color:var(--text); }
+    .motivation { font-size:1.1rem; margin:0; color:var(--text); line-height:1.6; max-width:760px; }
+    .motivation strong { color:var(--accent); }
+    .motivation-tools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+
+    .theme-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:10px; }
+    .theme-note { font-size:.85rem; color:var(--muted); margin-top:6px; }
+
+    .stats-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:10px; margin-top:12px; }
+    .stat { padding:12px; border-radius:12px; border:1px solid color-mix(in srgb, var(--border) 80%, transparent); background:color-mix(in srgb, var(--card) 92%, transparent); }
+    .stat-value { font-size:1.6rem; font-family:var(--font-mono); font-weight:700; }
+    .stat-label { color:var(--muted); font-size:.85rem; margin-top:4px; }
+
+    .history-list { margin:14px 0 0; padding:0; list-style:none; display:grid; gap:8px; }
+    .history-list li { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; border:1px solid color-mix(in srgb, var(--border) 70%, transparent); background:color-mix(in srgb, var(--card) 88%, transparent); font-size:.92rem; }
+    .history-list li span { color:var(--muted); font-size:.85rem; }
+
+    .empty { font-style:italic; color:var(--muted); }
 
     /* Footer */
     footer { max-width:var(--container-max); margin:0 auto; color:var(--muted); font-size:.95rem; padding:8px 0; text-align:center; }
@@ -204,6 +291,7 @@
   <header class="topbar" role="banner">
     <div class="topbar-inner">
       <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true"></div>
         <div>
           <div class="brand-title">Focus Studio</div>
           <div class="brand-sub subtle">Clocks • Pomodoro • Motivation</div>
@@ -220,6 +308,18 @@
   </header>
 
   <main class="container" role="main">
+    <section id="hero" class="card hero" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <div class="badge" aria-hidden="true">New • Daily focus companion</div>
+        <h1 id="hero-title">Design your ideal focus ritual.</h1>
+        <p>Focus Studio brings clocks, timers, and inspiration together. Craft your own theme, stay on track with live Pomodoro stats, and capture the motivation that keeps you moving.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#pomodoro">Start a session</a>
+          <a class="btn secondary" href="#theme">Customize theme</a>
+        </div>
+      </div>
+    </section>
+
     <div class="grid">
       <!-- Clocks -->
       <section id="clocks" class="card" aria-labelledby="clocks-title">
@@ -310,6 +410,59 @@
         </details>
       </section>
 
+      <!-- Theme -->
+      <section id="theme" class="card" aria-labelledby="theme-title">
+        <div class="card-header">
+          <div>
+            <h2 id="theme-title">Theme Studio</h2>
+            <p class="subtle">Fine-tune the interface with live previews and reusable presets.</p>
+          </div>
+          <span class="pill">Autosaves locally</span>
+        </div>
+
+        <div class="theme-grid" aria-live="polite">
+          <label>Accent color
+            <input type="color" id="varAccent" value="#6aa0ff" />
+          </label>
+          <label>Background
+            <input type="color" id="varBg" value="#0b0f15" />
+          </label>
+          <label>Card surface
+            <input type="color" id="varCard" value="#121826" />
+          </label>
+          <label>Primary text
+            <input type="color" id="varText" value="#e8eef9" />
+          </label>
+          <label>Muted text
+            <input type="color" id="varMuted" value="#90A0B7" />
+          </label>
+          <label>Button background
+            <input type="color" id="varBtnBg" value="#6aa0ff" />
+          </label>
+          <label>Button text
+            <input type="color" id="varBtnText" value="#0c1117" />
+          </label>
+          <label>Button radius (px)
+            <input type="number" id="varBtnRadius" min="4" max="32" value="12" />
+          </label>
+          <label>Interface font
+            <input type="text" id="varFont" placeholder="system-ui" />
+          </label>
+          <label>Base font size
+            <input type="range" id="varFontSize" min="14" max="20" value="16" />
+          </label>
+        </div>
+
+        <p class="theme-note">Changes update instantly. Save a favorite look or export a JSON preset to reuse across devices.</p>
+
+        <div class="controls" style="margin-top:12px; flex-wrap:wrap;">
+          <button class="btn small" id="btnSaveTheme" type="button">Save theme</button>
+          <button class="btn small secondary" id="btnResetTheme" type="button">Reset</button>
+          <button class="btn small secondary" id="btnExport" type="button">Export</button>
+          <button class="btn small ghost" id="btnImport" type="button">Import</button>
+        </div>
+      </section>
+
       <!-- Pomodoro -->
       <section id="pomodoro" class="card" aria-labelledby="pomo-title">
         <h2 id="pomo-title">Pomodoro Timer</h2>
@@ -369,6 +522,72 @@
           </details>
         </div>
       </section>
+
+      <!-- Insights -->
+      <section id="insights" class="card" aria-labelledby="insights-title">
+        <div class="card-header">
+          <div>
+            <h2 id="insights-title">Focus Insights</h2>
+            <p class="subtle">Track momentum across your sessions. Stats reset automatically at midnight.</p>
+          </div>
+          <button class="btn small ghost" id="btnNotify" type="button">Enable notifications</button>
+        </div>
+
+        <div class="stats-grid" role="list">
+          <div class="stat" role="listitem">
+            <div class="stat-value" id="focusSessions">0</div>
+            <div class="stat-label">Sessions completed</div>
+          </div>
+          <div class="stat" role="listitem">
+            <div class="stat-value" id="focusTime">0m</div>
+            <div class="stat-label">Deep work logged</div>
+          </div>
+          <div class="stat" role="listitem">
+            <div class="stat-value" id="lastSession">—</div>
+            <div class="stat-label">Last session</div>
+          </div>
+        </div>
+
+        <details style="margin-top:14px;">
+          <summary>Recent focus history</summary>
+          <ul class="history-list" id="focusHistory">
+            <li class="empty">No sessions yet. Start a Pomodoro to build momentum.</li>
+          </ul>
+        </details>
+      </section>
+
+      <!-- Motivation -->
+      <section id="motivation" class="card" aria-labelledby="motivation-title">
+        <div class="card-header">
+          <div>
+            <h2 id="motivation-title">Motivation Lab</h2>
+            <p class="subtle">Get a fresh message every hour, remix it instantly, or curate your own library.</p>
+          </div>
+          <div class="motivation-tools" role="group" aria-label="Motivation controls">
+            <button class="btn small" id="btnShuffle" type="button">Shuffle</button>
+            <button class="btn small secondary" id="btnCopy" type="button">Copy</button>
+            <button class="btn small ghost" id="btnAddQuote" type="button">Add message</button>
+          </div>
+        </div>
+
+        <div class="motivation-wrap">
+          <p class="motivation" id="quoteText">Focus is the bridge between dreaming and doing.</p>
+        </div>
+
+        <details style="margin-top:16px;">
+          <summary>My saved affirmations</summary>
+          <div class="form-grid" style="margin-top:10px;">
+            <label for="newQuote">Write a message to revisit later
+              <textarea id="newQuote" placeholder="Example: One deep session is all it takes to make progress."></textarea>
+            </label>
+          </div>
+          <div class="controls" style="margin-top:10px;">
+            <button class="btn small" id="saveQuote" type="button">Save message</button>
+            <button class="btn small warn" id="clearQuotes" type="button">Clear all</button>
+          </div>
+          <div id="userQuotesWrap" style="margin-top:12px; display:flex; flex-direction:column; gap:6px;"></div>
+        </details>
+      </section>
     </div>
   </main>
 
@@ -383,6 +602,7 @@
     const $ = (sel, root = document) => root.querySelector(sel);
     const $$ = (sel, root = document) => Array.from((root || document).querySelectorAll(sel));
     const clamp = (x, min, max) => Math.min(max, Math.max(min, x));
+    const defaultTitle = document.title;
 
     // Local storage helpers
     const store = {
@@ -840,6 +1060,7 @@
        Pomodoro
        ---------------------------- */
     const POMO_KEY = "tfs_pomodoro_settings";
+    const STATS_KEY = "tfs_focus_stats";
     const pomoDefaults = { work:25*60, short:5*60, long:15*60, rounds:4, auto:true, sound:true, volume:0.5 };
     let pomoSettings = {...pomoDefaults, ...store.get(POMO_KEY, {})};
 
@@ -876,9 +1097,14 @@
       if (modeEl) modeEl.textContent = ({ work:"Work", short:"Short Break", long:"Long Break" })[pomoMode];
       if (roundEl) roundEl.textContent = `Round ${pomoRound}`;
       if (timeEl) timeEl.textContent = formatSeconds(pomoRemaining);
-      if (statusEl) statusEl.textContent = pomoRunning ? "Running" : "Paused";
+      if (statusEl) {
+        if (pomoRunning) statusEl.textContent = "Running";
+        else if (pomoRemaining === pomoTotal) statusEl.textContent = "Idle";
+        else statusEl.textContent = "Paused";
+      }
       const progress = 1 - (pomoRemaining / Math.max(1, pomoTotal));
       if (ring) ring.style.setProperty("--p", (progress * 100).toFixed(2));
+      updateDocumentTitle();
     }
 
     function formatSeconds(s) {
@@ -893,6 +1119,7 @@
       lastTick = performance.now();
       if ($("#pomoStatus")) $("#pomoStatus").textContent = "Running";
       pomoTimer = requestAnimationFrame(stepPomo);
+      updateDocumentTitle();
     }
 
     function pausePomo() {
@@ -900,6 +1127,7 @@
       pomoRunning = false;
       if ($("#pomoStatus")) $("#pomoStatus").textContent = "Paused";
       if (pomoTimer) cancelAnimationFrame(pomoTimer);
+      updateDocumentTitle();
     }
 
     function resetPomo() {
@@ -926,9 +1154,12 @@
     }
 
     function completeSession() {
+      const endedMode = pomoMode;
+      const endedDuration = pomoTotal;
       pausePomo();
-      signalEnd();
-      if (pomoMode === "work") {
+      signalEnd(endedMode);
+      if (endedMode === "work") {
+        recordFocusSession(endedDuration);
         if (pomoRound % pomoSettings.rounds === 0) {
           setPomoMode("long");
         } else {
@@ -942,12 +1173,12 @@
       if (pomoSettings.auto) setTimeout(startPomo, 400);
     }
 
-    function signalEnd() {
+    function signalEnd(mode) {
       if (pomoSettings.sound) beepPattern(pomoSettings.volume);
       try {
         if ("Notification" in window && Notification.permission === "granted") {
-          const title = pomoMode === "work" ? "Break time!" : "Back to work!";
-          const body = pomoMode === "work" ? "Great job. Take a breather." : "Let’s focus for the next session.";
+          const title = mode === "work" ? "Break time!" : "Back to work!";
+          const body = mode === "work" ? "Great job. Take a breather." : "Let’s focus for the next session.";
           new Notification(title, { body });
         }
       } catch {}
@@ -1001,7 +1232,109 @@
     bindIf("#pSound", "input", () => { pomoSettings.sound = $("#pSound").value === "true"; store.set(POMO_KEY, pomoSettings); });
     bindIf("#pVolume", "input", () => { pomoSettings.volume = parseFloat($("#pVolume").value); store.set(POMO_KEY, pomoSettings); });
 
+    function updateDocumentTitle() {
+      const time = $("#pomoTime")?.textContent || "";
+      const modeLabel = ({ work:"Focus", short:"Break", long:"Deep break" })[pomoMode] || "Focus";
+      if (pomoRunning) {
+        document.title = `${time} • ${modeLabel}`;
+      } else if (pomoRemaining !== pomoTotal) {
+        document.title = `${time} • Paused`;
+      } else {
+        document.title = defaultTitle;
+      }
+    }
+
+    const statsDefaults = { sessions: 0, focusSeconds: 0, lastCompleted: null, history: [] };
+    let focusStats = {...statsDefaults, ...store.get(STATS_KEY, {})};
+
+    function saveStats() { store.set(STATS_KEY, focusStats); }
+
+    function recordFocusSession(durationSeconds) {
+      focusStats.sessions += 1;
+      focusStats.focusSeconds += durationSeconds;
+      const now = Date.now();
+      focusStats.lastCompleted = now;
+      const entry = { ts: now, duration: durationSeconds };
+      focusStats.history = [entry, ...(focusStats.history || [])].slice(0, 7);
+      saveStats();
+      renderStats();
+      flashStatus("Session logged");
+    }
+
+    function formatDurationHuman(seconds) {
+      const mins = Math.round(seconds / 60);
+      if (mins < 60) return `${mins}m`;
+      const hrs = Math.floor(mins / 60);
+      const rem = mins % 60;
+      return rem ? `${hrs}h ${rem}m` : `${hrs}h`;
+    }
+
+    function formatRelativeTime(ts) {
+      if (!ts) return "—";
+      const diff = Date.now() - ts;
+      const minutes = Math.round(diff / 60000);
+      if (minutes < 1) return "just now";
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.round(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.round(hours / 24);
+      return `${days}d ago`;
+    }
+
+    function renderStats() {
+      const sessionsEl = $("#focusSessions"), timeEl = $("#focusTime"), lastEl = $("#lastSession"), historyEl = $("#focusHistory");
+      if (sessionsEl) sessionsEl.textContent = focusStats.sessions;
+      if (timeEl) timeEl.textContent = focusStats.focusSeconds ? formatDurationHuman(focusStats.focusSeconds) : "0m";
+      if (lastEl) lastEl.textContent = focusStats.lastCompleted ? formatRelativeTime(focusStats.lastCompleted) : "—";
+      if (historyEl) {
+        if (!focusStats.history || !focusStats.history.length) {
+          historyEl.innerHTML = '<li class="empty">No sessions yet. Start a Pomodoro to build momentum.</li>';
+        } else {
+          historyEl.innerHTML = "";
+          focusStats.history.forEach(item => {
+            const li = document.createElement("li");
+            const left = document.createElement("div");
+            left.textContent = new Date(item.ts).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+            const right = document.createElement("span");
+            right.textContent = formatDurationHuman(item.duration);
+            li.append(left, right);
+            historyEl.appendChild(li);
+          });
+        }
+      }
+    }
+
+    function resetStatsIfNeeded() {
+      const now = new Date();
+      const stored = focusStats.lastCompleted ? new Date(focusStats.lastCompleted) : null;
+      if (!stored) return;
+      const sameDay = stored.getFullYear() === now.getFullYear() && stored.getMonth() === now.getMonth() && stored.getDate() === now.getDate();
+      if (!sameDay) {
+        focusStats = {...statsDefaults};
+        saveStats();
+        renderStats();
+      }
+    }
+
+    function requestNotifications() {
+      if (!("Notification" in window)) {
+        flashStatus("Notifications unsupported");
+        return;
+      }
+      if (Notification.permission === "granted") {
+        flashStatus("Notifications already on");
+        return;
+      }
+      Notification.requestPermission().then(result => {
+        flashStatus(result === "granted" ? "Notifications enabled" : "Notifications blocked");
+      });
+    }
+
+    onIf("#btnNotify", "click", requestNotifications);
+
     updatePomoUI();
+    resetStatsIfNeeded();
+    renderStats();
 
     function mulberry32(a) {
       return function() {
